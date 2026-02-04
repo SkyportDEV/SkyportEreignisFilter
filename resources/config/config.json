@@ -1,0 +1,155 @@
+{
+    "debug": {
+        "type": "bool",
+        "default": false,
+        "label": {
+            "de": "Debug Ausgabe aktivieren",
+            "en": "Enable debug output"
+        }
+    },
+    "filters": {
+        "type": "fieldset",
+        "label": {
+            "de": "Einstellungen für Order-Filter (Filter 1..6)",
+            "en": "Settings for order filters (Filter 1..6)"
+        },
+        "children": {
+            "filter1": {
+                "$ref": "#/definitions/filterSlot",
+                "label": {
+                    "de": "Konfiguration für Filter 1",
+                    "en": "Configuration for Filter 1"
+                }
+            },
+            "filter2": {
+                "$ref": "#/definitions/filterSlot",
+                "label": {
+                    "de": "Konfiguration für Filter 2",
+                    "en": "Configuration for Filter 2"
+                }
+            },
+            "filter3": {
+                "$ref": "#/definitions/filterSlot",
+                "label": {
+                    "de": "Konfiguration für Filter 3",
+                    "en": "Configuration for Filter 3"
+                }
+            },
+            "filter4": {
+                "$ref": "#/definitions/filterSlot",
+                "label": {
+                    "de": "Konfiguration für Filter 4",
+                    "en": "Configuration for Filter 4"
+                }
+            },
+            "filter5": {
+                "$ref": "#/definitions/filterSlot",
+                "label": {
+                    "de": "Konfiguration für Filter 5",
+                    "en": "Configuration for Filter 5"
+                }
+            },
+            "filter6": {
+                "$ref": "#/definitions/filterSlot",
+                "label": {
+                    "de": "Konfiguration für Filter 6",
+                    "en": "Configuration for Filter 6"
+                }
+            }
+        }
+    },
+    "definitions": {
+        "filterSlot": {
+            "type": "fieldset",
+            "children": {
+                "enabled": {
+                    "type": "bool",
+                    "default": false,
+                    "label": {
+                        "de": "Aktiv",
+                        "en": "Enabled"
+                    }
+                },
+                "type": {
+                    "type": "select",
+                    "default": "contact",
+                    "label": {
+                        "de": "Typ",
+                        "en": "Type"
+                    },
+                    "values": [
+                        {
+                            "value": "contact",
+                            "label": {
+                                "de": "ContactId (receiver contact)",
+                                "en": "ContactId (receiver contact)"
+                            }
+                        },
+                        {
+                            "value": "billingAddress",
+                            "label": {
+                                "de": "Billing addressId (typeId 1)",
+                                "en": "Billing addressId (typeId 1)"
+                            }
+                        },
+                        {
+                            "value": "shippingAddress",
+                            "label": {
+                                "de": "Shipping addressId (typeId 2)",
+                                "en": "Shipping addressId (typeId 2)"
+                            }
+                        }
+                    ]
+                },
+                "mode": {
+                    "type": "select",
+                    "default": "allow",
+                    "label": {
+                        "de": "Modus",
+                        "en": "Mode"
+                    },
+                    "values": [
+                        {
+                            "value": "allow",
+                            "label": {
+                                "de": "Nur diese IDs erlauben (Allowlist)",
+                                "en": "Allow these IDs only (Allowlist)"
+                            }
+                        },
+                        {
+                            "value": "deny",
+                            "label": {
+                                "de": "Diese IDs sperren (Denylist)",
+                                "en": "Deny these IDs (Denylist)"
+                            }
+                        }
+                    ]
+                },
+                "ids": {
+                    "type": "text",
+                    "default": "",
+                    "label": {
+                        "de": "IDs (CSV)",
+                        "en": "IDs (CSV)"
+                    },
+                    "placeholder": {
+                        "de": "z.B. 123,456,789",
+                        "en": "e.g. 123,456,789"
+                    }
+                },
+                "hint": {
+                    "type": "text",
+                    "default": "",
+                    "label": {
+                        "de": "Hinweis / Zweck dieses Filters",
+                        "en": "Hint / purpose of this filter"
+                    },
+                    "placeholder": {
+                        "de": "z. B. Nur B2B-Kunden, Projekt X",
+                        "en": "e.g. B2B customers only, project X"
+                    }
+                }
+            }
+        }
+    }
+}
