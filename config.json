@@ -1,0 +1,279 @@
+[
+    {
+        "tab": "Allgemein",
+        "key": "debug",
+        "label": "Debug Ausgabe aktivieren",
+        "type": "boolean",
+        "default": false
+    },
+
+    {
+        "tab": "Filter 1",
+        "key": "filter1_enabled",
+        "label": "Aktiv",
+        "type": "boolean",
+        "default": false
+    },
+    {
+        "tab": "Filter 1",
+        "key": "filter1_type",
+        "label": "Typ",
+        "type": "dropdown",
+        "possibleValues": {
+            "contact": "ContactId (receiver contact)",
+            "billingAddress": "Billing addressId (typeId 1)",
+            "shippingAddress": "Shipping addressId (typeId 2)"
+        },
+        "default": "contact"
+    },
+    {
+        "tab": "Filter 1",
+        "key": "filter1_mode",
+        "label": "Modus",
+        "type": "dropdown",
+        "possibleValues": {
+            "allow": "Allowlist",
+            "deny": "Denylist"
+        },
+        "default": "allow"
+    },
+    {
+        "tab": "Filter 1",
+        "key": "filter1_ids",
+        "label": "IDs (CSV)",
+        "type": "text",
+        "default": ""
+    },
+    {
+        "tab": "Filter 1",
+        "key": "filter1_hint",
+        "label": "Hinweis / Zweck",
+        "type": "text",
+        "default": ""
+    },
+
+    {
+        "tab": "Filter 2",
+        "key": "filter2_enabled",
+        "label": "Aktiv",
+        "type": "boolean",
+        "default": false
+    },
+    {
+        "tab": "Filter 2",
+        "key": "filter2_type",
+        "label": "Typ",
+        "type": "dropdown",
+        "possibleValues": {
+            "contact": "ContactId (receiver contact)",
+            "billingAddress": "Billing addressId (typeId 1)",
+            "shippingAddress": "Shipping addressId (typeId 2)"
+        },
+        "default": "contact"
+    },
+    {
+        "tab": "Filter 2",
+        "key": "filter2_mode",
+        "label": "Modus",
+        "type": "dropdown",
+        "possibleValues": {
+            "allow": "Allowlist",
+            "deny": "Denylist"
+        },
+        "default": "allow"
+    },
+    {
+        "tab": "Filter 2",
+        "key": "filter2_ids",
+        "label": "IDs (CSV)",
+        "type": "text",
+        "default": ""
+    },
+    {
+        "tab": "Filter 2",
+        "key": "filter2_hint",
+        "label": "Hinweis / Zweck",
+        "type": "text",
+        "default": ""
+    },
+
+    {
+        "tab": "Filter 3",
+        "key": "filter3_enabled",
+        "label": "Aktiv",
+        "type": "boolean",
+        "default": false
+    },
+    {
+        "tab": "Filter 3",
+        "key": "filter3_type",
+        "label": "Typ",
+        "type": "dropdown",
+        "possibleValues": {
+            "contact": "ContactId (receiver contact)",
+            "billingAddress": "Billing addressId (typeId 1)",
+            "shippingAddress": "Shipping addressId (typeId 2)"
+        },
+        "default": "contact"
+    },
+    {
+        "tab": "Filter 3",
+        "key": "filter3_mode",
+        "label": "Modus",
+        "type": "dropdown",
+        "possibleValues": {
+            "allow": "Allowlist",
+            "deny": "Denylist"
+        },
+        "default": "allow"
+    },
+    {
+        "tab": "Filter 3",
+        "key": "filter3_ids",
+        "label": "IDs (CSV)",
+        "type": "text",
+        "default": ""
+    },
+    {
+        "tab": "Filter 3",
+        "key": "filter3_hint",
+        "label": "Hinweis / Zweck",
+        "type": "text",
+        "default": ""
+    },
+
+    {
+        "tab": "Filter 4",
+        "key": "filter4_enabled",
+        "label": "Aktiv",
+        "type": "boolean",
+        "default": false
+    },
+    {
+        "tab": "Filter 4",
+        "key": "filter4_type",
+        "label": "Typ",
+        "type": "dropdown",
+        "possibleValues": {
+            "contact": "ContactId (receiver contact)",
+            "billingAddress": "Billing addressId (typeId 1)",
+            "shippingAddress": "Shipping addressId (typeId 2)"
+        },
+        "default": "contact"
+    },
+    {
+        "tab": "Filter 4",
+        "key": "filter4_mode",
+        "label": "Modus",
+        "type": "dropdown",
+        "possibleValues": {
+            "allow": "Allowlist",
+            "deny": "Denylist"
+        },
+        "default": "allow"
+    },
+    {
+        "tab": "Filter 4",
+        "key": "filter4_ids",
+        "label": "IDs (CSV)",
+        "type": "text",
+        "default": ""
+    },
+    {
+        "tab": "Filter 4",
+        "key": "filter4_hint",
+        "label": "Hinweis / Zweck",
+        "type": "text",
+        "default": ""
+    },
+
+    {
+        "tab": "Filter 5",
+        "key": "filter5_enabled",
+        "label": "Aktiv",
+        "type": "boolean",
+        "default": false
+    },
+    {
+        "tab": "Filter 5",
+        "key": "filter5_type",
+        "label": "Typ",
+        "type": "dropdown",
+        "possibleValues": {
+            "contact": "ContactId (receiver contact)",
+            "billingAddress": "Billing addressId (typeId 1)",
+            "shippingAddress": "Shipping addressId (typeId 2)"
+        },
+        "default": "contact"
+    },
+    {
+        "tab": "Filter 5",
+        "key": "filter5_mode",
+        "label": "Modus",
+        "type": "dropdown",
+        "possibleValues": {
+            "allow": "Allowlist",
+            "deny": "Denylist"
+        },
+        "default": "allow"
+    },
+    {
+        "tab": "Filter 5",
+        "key": "filter5_ids",
+        "label": "IDs (CSV)",
+        "type": "text",
+        "default": ""
+    },
+    {
+        "tab": "Filter 5",
+        "key": "filter5_hint",
+        "label": "Hinweis / Zweck",
+        "type": "text",
+        "default": ""
+    },
+
+    {
+        "tab": "Filter 6",
+        "key": "filter6_enabled",
+        "label": "Aktiv",
+        "type": "boolean",
+        "default": false
+    },
+    {
+        "tab": "Filter 6",
+        "key": "filter6_type",
+        "label": "Typ",
+        "type": "dropdown",
+        "possibleValues": {
+            "contact": "ContactId (receiver contact)",
+            "billingAddress": "Billing addressId (typeId 1)",
+            "shippingAddress": "Shipping addressId (typeId 2)"
+        },
+        "default": "contact"
+    },
+    {
+        "tab": "Filter 6",
+        "key": "filter6_mode",
+        "label": "Modus",
+        "type": "dropdown",
+        "possibleValues": {
+            "allow": "Allowlist",
+            "deny": "Denylist"
+        },
+        "default": "allow"
+    },
+    {
+        "tab": "Filter 6",
+        "key": "filter6_ids",
+        "label": "IDs (CSV)",
+        "type": "text",
+        "default": ""
+    },
+    {
+        "tab": "Filter 6",
+        "key": "filter6_hint",
+        "label": "Hinweis / Zweck",
+        "type": "text",
+        "default": ""
+    }
+]
