@@ -290,7 +290,9 @@ class OrderFilters
             'contactId' => isset($order->contactId) ? (int)$order->contactId : 0,
             'has_addressRelations' => (isset($order->addressRelations) && is_array($order->addressRelations)) ? 1 : 0,
             'has_addresses' => (isset($order->addresses) && is_array($order->addresses)) ? 1 : 0,
-            'has_orderRelations' => (isset($order->orderRelations) && is_array($order->orderRelations)) ? 1 : 0
+            'has_orderRelations' => (isset($order->orderRelations) && is_array($order->orderRelations)) ? 1 : 0,
+            'billingAddress_id' => (isset($order->billingAddress) && isset($order->billingAddress->id)) ? (int)$order->billingAddress->id : 0,
+            'deliveryAddress_id' => (isset($order->deliveryAddress) && isset($order->deliveryAddress->id)) ? (int)$order->deliveryAddress->id : 0
         ];
 
         if (isset($order->addressRelations) && is_array($order->addressRelations)) {
