@@ -27,7 +27,7 @@
         "label": "Typ",
         "type": "dropdown",
         "possibleValues": {
-            "contact": "Kontakt-ID (Empfänger)",
+            "contact": "Kontakt-ID",
             "billingAddress": "ID der Rechnungsadresse",
             "shippingAddress": "ID der Lieferadresse"
         },
@@ -75,7 +75,7 @@
         "label": "Typ",
         "type": "dropdown",
         "possibleValues": {
-            "contact": "Kontakt-ID (Empfänger)",
+            "contact": "Kontakt-ID",
             "billingAddress": "ID der Rechnungsadresse",
             "shippingAddress": "ID der Lieferadresse"
         },
@@ -123,7 +123,7 @@
         "label": "Typ",
         "type": "dropdown",
         "possibleValues": {
-            "contact": "Kontakt-ID (Empfänger)",
+            "contact": "Kontakt-ID",
             "billingAddress": "ID der Rechnungsadresse",
             "shippingAddress": "ID der Lieferadresse"
         },
@@ -171,7 +171,7 @@
         "label": "Typ",
         "type": "dropdown",
         "possibleValues": {
-            "contact": "Kontakt-ID (Empfänger)",
+            "contact": "Kontakt-ID",
             "billingAddress": "ID der Rechnungsadresse",
             "shippingAddress": "ID der Lieferadresse"
         },
@@ -219,7 +219,7 @@
         "label": "Typ",
         "type": "dropdown",
         "possibleValues": {
-            "contact": "Kontakt-ID (Empfänger)",
+            "contact": "Kontakt-ID",
             "billingAddress": "ID der Rechnungsadresse",
             "shippingAddress": "ID der Lieferadresse"
         },
@@ -267,7 +267,7 @@
         "label": "Typ",
         "type": "dropdown",
         "possibleValues": {
-            "contact": "Kontakt-ID (Empfänger)",
+            "contact": "Kontakt-ID",
             "billingAddress": "ID der Rechnungsadresse",
             "shippingAddress": "ID der Lieferadresse"
         },
