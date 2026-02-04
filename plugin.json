@@ -4,6 +4,6 @@
     "type": "general",
     "version": "1.0.0",
     "description": "Ereignisaktions-Filter für Aufträge nach ContactId sowie Billing-/Shipping-AddressId.",
-    "author": "Skyport",
+    "author": "Skyport GmbH (Alexander Schieder)",
     "serviceProvider": "SkyportAuftragsFilter\\Providers\\SkyportAuftragsFilterServiceProvider"
 }
