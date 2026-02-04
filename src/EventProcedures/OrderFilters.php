@@ -31,20 +31,19 @@ class OrderFilters
             return false;
         }
 
-        $slotKey = 'filters.filter' . $slot;
-
-        if (!(bool)$this->getConfig($slotKey . '.enabled', false)) {
+        $enabled = (bool)$this->getConfig('filter' . $slot . '_enabled', false);
+        if (!$enabled) {
             return false;
         }
 
-        $type = (string)$this->getConfig($slotKey . '.type', 'contact');
-        $mode = (string)$this->getConfig($slotKey . '.mode', 'allow');
-        $idsCsv = (string)$this->getConfig($slotKey . '.ids', '');
-        $hint = (string)$this->getConfig($slotKey . '.hint', '');
+        $type = (string)$this->getConfig('filter' . $slot . '_type', 'contact');
+        $mode = (string)$this->getConfig('filter' . $slot . '_mode', 'allow');
+        $idsCsv = (string)$this->getConfig('filter' . $slot . '_ids', '');
+        $hint = (string)$this->getConfig('filter' . $slot . '_hint', '');
 
         $ids = $this->parseIds($idsCsv);
         if (count($ids) === 0) {
-            $this->debug('Slot ' . $slot . $this->hint($hint) . ' keine IDs konfiguriert');
+            $this->debug('Slot ' . $slot . $this->hint($hint) . ' keine IDs konfiguriert -> false');
             return false;
         }
 
@@ -57,12 +56,12 @@ class OrderFilters
         } elseif ($type === 'shippingAddress') {
             $value = $this->extractAddressIdByTypeId($order, 2);
         } else {
-            $this->debug('Slot ' . $slot . $this->hint($hint) . ' unbekannter Typ: ' . $type);
+            $this->debug('Slot ' . $slot . $this->hint($hint) . ' unbekannter Typ: ' . $type . ' -> false');
             return false;
         }
 
         if ($value <= 0) {
-            $this->debug('Slot ' . $slot . $this->hint($hint) . ' kein Wert ermittelbar');
+            $this->debug('Slot ' . $slot . $this->hint($hint) . ' kein Wert ermittelbar (type=' . $type . ') -> false');
             return false;
         }
 
@@ -75,6 +74,7 @@ class OrderFilters
             ' type=' . $type .
             ' value=' . $value .
             ' mode=' . $mode .
+            ' inList=' . ($inList ? '1' : '0') .
             ' => ' . ($result ? 'true' : 'false')
         );
 
@@ -93,12 +93,17 @@ class OrderFilters
 
         foreach (explode(',', $csv) as $part) {
             $part = trim($part);
-            if ($part !== '') {
-                $out[] = (int)$part;
+            if ($part === '') {
+                continue;
+            }
+
+            $id = (int)$part;
+            if ($id > 0) {
+                $out[] = $id;
             }
         }
 
-        return array_values(array_unique(array_filter($out)));
+        return array_values(array_unique($out));
     }
 
     /**
@@ -113,8 +118,8 @@ class OrderFilters
         foreach ($order->orderRelations as $relation) {
             if (
                 isset($relation->referenceType, $relation->relation, $relation->referenceId)
-                && $relation->referenceType === 'contact'
-                && $relation->relation === 'receiver'
+                && (string)$relation->referenceType === 'contact'
+                && (string)$relation->relation === 'receiver'
             ) {
                 return (int)$relation->referenceId;
             }
@@ -151,7 +156,8 @@ class OrderFilters
 
     private function debug(string $message): void
     {
-        if (!(bool)$this->getConfig('debug', false)) {
+        $debugEnabled = (bool)$this->getConfig('debug', false);
+        if (!$debugEnabled) {
             return;
         }
 
