@@ -114,10 +114,27 @@ class OrderFilters
      */
     private function extractReceiverContactId($order): int
     {
+        // 1) Best case (Order-Model Feld): receiver contact id
+        if (isset($order->contactReceiverId)) {
+            $cid = (int)$order->contactReceiverId;
+            if ($cid > 0) {
+                return $cid;
+            }
+        }
+    
+        // 2) Fallback (manche Kontexte): contactId
+        if (isset($order->contactId)) {
+            $cid = (int)$order->contactId;
+            if ($cid > 0) {
+                return $cid;
+            }
+        }
+    
+        // 3) Letzter Fallback: orderRelations (falls vorhanden)
         if (!isset($order->orderRelations) || !is_array($order->orderRelations)) {
             return 0;
         }
-
+    
         foreach ($order->orderRelations as $relation) {
             if (
                 isset($relation->referenceType, $relation->relation, $relation->referenceId)
@@ -127,28 +144,50 @@ class OrderFilters
                 return (int)$relation->referenceId;
             }
         }
-
+    
         return 0;
     }
 
     /**
      * AddressId aus addressRelations (typeId: 1=billing, 2=shipping)
      */
-    private function extractAddressIdByTypeId($order, int $typeId): int
+    private function extractAddressIdByType($order, int $typeId): int
     {
-        if (!isset($order->addressRelations) || !is_array($order->addressRelations)) {
+        // Einige Systeme liefern addressRelations, andere addresses
+        $list = null;
+    
+        if (isset($order->addressRelations) && is_array($order->addressRelations)) {
+            $list = $order->addressRelations;
+        } elseif (isset($order->addresses) && is_array($order->addresses)) {
+            $list = $order->addresses;
+        }
+    
+        if (!is_array($list)) {
             return 0;
         }
-
-        foreach ($order->addressRelations as $relation) {
-            if (
-                isset($relation->typeId, $relation->addressId)
-                && (int)$relation->typeId === $typeId
-            ) {
-                return (int)$relation->addressId;
+    
+        foreach ($list as $row) {
+            // Varianten: typeId / addressTypeId / orderAddressTypeId
+            $t = 0;
+            if (isset($row->typeId)) {
+                $t = (int)$row->typeId;
+            } elseif (isset($row->addressTypeId)) {
+                $t = (int)$row->addressTypeId;
+            }
+    
+            if ($t !== $typeId) {
+                continue;
+            }
+    
+            // Varianten: addressId / id
+            if (isset($row->addressId)) {
+                return (int)$row->addressId;
+            }
+            if (isset($row->id)) {
+                return (int)$row->id;
             }
         }
-
+    
         return 0;
     }
 
