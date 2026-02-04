@@ -27,6 +27,7 @@ class OrderFilters
     private function checkSlot(EventProceduresTriggered $event, int $slot): bool
     {
         $order = $event->getOrder();
+        $this->dumpOrder($order, 'before_hydrate');
         if (!$order) {
             return false;
         }
@@ -204,5 +205,85 @@ class OrderFilters
         }
 
         $this->getLogger('Skyport::AuftragsFilter')->info($message);
+    }
+
+    private function dumpOrder($order, string $tag): void
+    {
+        if (((int)$this->getConfig('debug', 0) !== 1)) {
+            return;
+        }
+    
+        $data = $this->toArraySafe($order, 4, 25);
+    
+        // Damit du es im Log wiederfindest:
+        $this->getLogger('Skyport::AuftragsFilter')->info('ORDER_DUMP ' . $tag, $data);
+    }
+    
+    /**
+     * Wandelt Objekt/Array rekursiv in Arrays um.
+     * - maxDepth: wie tief rekursiv geloggt wird
+     * - maxItems: wie viele Elemente pro Array/Objekt geloggt werden
+     */
+    private function toArraySafe($value, int $maxDepth = 3, int $maxItems = 30)
+    {
+        if ($maxDepth <= 0) {
+            return '[maxDepth]';
+        }
+    
+        if (is_null($value) || is_scalar($value)) {
+            return $value;
+        }
+    
+        // Arrays
+        if (is_array($value)) {
+            $out = [];
+            $i = 0;
+            foreach ($value as $k => $v) {
+                $out[(string)$k] = $this->toArraySafe($v, $maxDepth - 1, $maxItems);
+                $i++;
+                if ($i >= $maxItems) {
+                    $out['...'] = '[maxItems reached]';
+                    break;
+                }
+            }
+            return $out;
+        }
+    
+        // Traversable (falls plentymarkets collections liefert)
+        if ($value instanceof \Traversable) {
+            $out = [];
+            $i = 0;
+            foreach ($value as $k => $v) {
+                $out[(string)$k] = $this->toArraySafe($v, $maxDepth - 1, $maxItems);
+                $i++;
+                if ($i >= $maxItems) {
+                    $out['...'] = '[maxItems reached]';
+                    break;
+                }
+            }
+            return $out;
+        }
+    
+        // Objekte: nur public properties
+        if (is_object($value)) {
+            $vars = get_object_vars($value);
+            $out = [
+                '__class' => get_class($value)
+            ];
+    
+            $i = 0;
+            foreach ($vars as $k => $v) {
+                $out[$k] = $this->toArraySafe($v, $maxDepth - 1, $maxItems);
+                $i++;
+                if ($i >= $maxItems) {
+                    $out['...'] = '[maxItems reached]';
+                    break;
+                }
+            }
+    
+            return $out;
+        }
+    
+        return '[unsupported type]';
     }
 }
