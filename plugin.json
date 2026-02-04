@@ -2,7 +2,7 @@
     "name": "SkyportAuftragsFilter",
     "namespace": "SkyportAuftragsFilter",
     "type": "general",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "description": "Ereignisaktions-Filter für Aufträge nach ContactId sowie Billing-/Shipping-AddressId.",
     "author": "Skyport GmbH (Alexander Schieder)",
     "serviceProvider": "SkyportAuftragsFilter\\Providers\\SkyportAuftragsFilterServiceProvider"
