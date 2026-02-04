@@ -1,9 +1,9 @@
 {
     "name": "SkyportAuftragsFilter",
-    "namespace": "Skyport\\AuftragsFilter",
-    "type": "plugin",
+    "namespace": "SkyportAuftragsFilter",
+    "type": "general",
     "version": "1.0.0",
     "description": "Ereignisaktions-Filter für Aufträge nach ContactId sowie Billing-/Shipping-AddressId.",
     "author": "Skyport",
-    "serviceProvider": "Skyport\\AuftragsFilter\\Providers\\SkyportAuftragsFilterServiceProvider"
+    "serviceProvider": "SkyportAuftragsFilter\\Providers\\SkyportAuftragsFilterServiceProvider"
 }
