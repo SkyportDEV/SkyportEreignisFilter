@@ -9,8 +9,11 @@ use SkyportAuftragsFilter\EventProcedures\OrderFilters;
 
 class SkyportAuftragsFilterServiceProvider extends ServiceProvider
 {
-    public function boot(EventProceduresService $eventProceduresService): void
+    public function register(): void
     {
+        /** @var EventProceduresService $eventProceduresService */
+        $eventProceduresService = $this->getApplication()->make(EventProceduresService::class);
+
         for ($i = 1; $i <= 6; $i++) {
             $eventProceduresService->registerFilter(
                 'skyport_auftrags_filter_' . $i,
