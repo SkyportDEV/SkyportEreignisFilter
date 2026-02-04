@@ -33,8 +33,7 @@ class OrderFilters
 
         $slotKey = 'filters.filter' . $slot;
 
-        $enabled = (bool)$this->getConfig($slotKey . '.enabled', false);
-        if (!$enabled) {
+        if (!(bool)$this->getConfig($slotKey . '.enabled', false)) {
             return false;
         }
 
@@ -45,7 +44,7 @@ class OrderFilters
 
         $ids = $this->parseIds($idsCsv);
         if (count($ids) === 0) {
-            $this->debug('Slot ' . $slot . ($hint !== '' ? ' (' . $hint . ')' : '') . ' hat keine IDs konfiguriert -> false');
+            $this->debug('Slot ' . $slot . $this->hint($hint) . ' keine IDs konfiguriert');
             return false;
         }
 
@@ -58,30 +57,24 @@ class OrderFilters
         } elseif ($type === 'shippingAddress') {
             $value = $this->extractAddressIdByTypeId($order, 2);
         } else {
-            $this->debug('Slot ' . $slot . ($hint !== '' ? ' (' . $hint . ')' : '') . ' unbekannter type=' . $type . ' -> false');
+            $this->debug('Slot ' . $slot . $this->hint($hint) . ' unbekannter Typ: ' . $type);
             return false;
         }
 
         if ($value <= 0) {
-            $this->debug('Slot ' . $slot . ($hint !== '' ? ' (' . $hint . ')' : '') . ' value konnte nicht ermittelt werden (type=' . $type . ') -> false');
+            $this->debug('Slot ' . $slot . $this->hint($hint) . ' kein Wert ermittelbar');
             return false;
         }
 
         $inList = in_array($value, $ids, true);
-
-        if ($mode === 'deny') {
-            $result = !$inList;
-        } else {
-            $result = $inList;
-        }
+        $result = ($mode === 'deny') ? !$inList : $inList;
 
         $this->debug(
             'Slot ' . $slot .
-            ($hint !== '' ? ' (' . $hint . ')' : '') .
+            $this->hint($hint) .
             ' type=' . $type .
-            ' mode=' . $mode .
             ' value=' . $value .
-            ' inList=' . ($inList ? '1' : '0') .
+            ' mode=' . $mode .
             ' => ' . ($result ? 'true' : 'false')
         );
 
@@ -90,119 +83,75 @@ class OrderFilters
 
     private function getConfig(string $key, $default)
     {
-        $fullKey = 'SkyportAuftragsFilter.' . $key;
-
-        $value = $this->config->get($fullKey);
-        if ($value === null) {
-            return $default;
-        }
-
-        return $value;
+        $value = $this->config->get('SkyportAuftragsFilter.' . $key);
+        return $value === null ? $default : $value;
     }
 
     private function parseIds(string $csv): array
     {
         $out = [];
+
         foreach (explode(',', $csv) as $part) {
             $part = trim($part);
-            if ($part === '') {
-                continue;
+            if ($part !== '') {
+                $out[] = (int)$part;
             }
-            $out[] = (int)$part;
         }
 
-        $out = array_filter($out, function ($v) {
-            return is_int($v) && $v > 0;
-        });
-
-        return array_values(array_unique($out));
+        return array_values(array_unique(array_filter($out)));
     }
 
+    /**
+     * ContactId aus OrderRelations (receiver contact)
+     */
     private function extractReceiverContactId($order): int
     {
-        $relations = null;
-
-        if (isset($order->relations)) {
-            $relations = $order->relations;
-        } elseif (isset($order->orderRelations)) {
-            $relations = $order->orderRelations;
-        }
-
-        if (!$relations || !is_iterable($relations)) {
+        if (!isset($order->orderRelations) || !is_array($order->orderRelations)) {
             return 0;
         }
 
-        foreach ($relations as $rel) {
-            $referenceType = $this->readProp($rel, 'referenceType');
-            $relation = $this->readProp($rel, 'relation');
-            $referenceId = (int)$this->readProp($rel, 'referenceId');
-
-            if ((string)$referenceType === 'contact' && (string)$relation === 'receiver') {
-                return $referenceId;
+        foreach ($order->orderRelations as $relation) {
+            if (
+                isset($relation->referenceType, $relation->relation, $relation->referenceId)
+                && $relation->referenceType === 'contact'
+                && $relation->relation === 'receiver'
+            ) {
+                return (int)$relation->referenceId;
             }
         }
 
         return 0;
     }
 
+    /**
+     * AddressId aus addressRelations (typeId: 1=billing, 2=shipping)
+     */
     private function extractAddressIdByTypeId($order, int $typeId): int
     {
-        $addressRelations = null;
-
-        if (isset($order->addressRelations)) {
-            $addressRelations = $order->addressRelations;
-        } elseif (isset($order->ordersAddressRelations)) {
-            $addressRelations = $order->ordersAddressRelations;
-        } elseif (isset($order->orderAddressRelations)) {
-            $addressRelations = $order->orderAddressRelations;
-        }
-
-        if (!$addressRelations || !is_iterable($addressRelations)) {
+        if (!isset($order->addressRelations) || !is_array($order->addressRelations)) {
             return 0;
         }
 
-        foreach ($addressRelations as $ar) {
-            $tId = (int)$this->readProp($ar, 'typeId');
-            if ($tId != $typeId) {
-                continue;
-            }
-
-            $addressId = (int)$this->readProp($ar, 'addressId');
-
-            if ($addressId <= 0) {
-                $addressId = (int)$this->readProp($ar, 'referenceId');
-            }
-
-            if ($addressId > 0) {
-                return $addressId;
+        foreach ($order->addressRelations as $relation) {
+            if (
+                isset($relation->typeId, $relation->addressId)
+                && (int)$relation->typeId === $typeId
+            ) {
+                return (int)$relation->addressId;
             }
         }
 
         return 0;
     }
 
-    private function readProp($obj, string $key)
+    private function hint(string $hint): string
     {
-        if (is_array($obj) && array_key_exists($key, $obj)) {
-            return $obj[$key];
-        }
-
-        if (is_object($obj) && isset($obj->{$key})) {
-            return $obj->{$key};
-        }
-
-        $method = 'get' . ucfirst($key);
-        if (is_object($obj) && method_exists($obj, $method)) {
-            return $obj->{$method}();
-        }
-
-        return null;
+        return $hint !== '' ? ' (' . $hint . ')' : '';
     }
 
     private function debug(string $message): void
     {
-        $debugEnabled = (bool)$this->getConfig('debug', false);
-        if (!$debugEnabled) {
+        if (!(bool)$this->getConfig('debug', false)) {
             return;
         }
 
