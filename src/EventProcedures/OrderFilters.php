@@ -221,13 +221,7 @@ class OrderFilters
             return;
         }
     
-        $this->getLogger('OrderFilters_debug')->report(
-            'SkyportAuftragsFilter::debug',
-            [
-                'de' => $message,
-                'en' => $message
-            ]
-        );
+        $this->getLogger('OrderFilters')->debug($message);
     }
 
     /**
@@ -265,14 +259,7 @@ class OrderFilters
             $data['orderRelations_preview'] = $this->dumpOrderRelations($order->orderRelations, 20);
         }
     
-        $this->getLogger('OrderFilters_dumpOrder')->report(
-            'SkyportAuftragsFilter::orderDump',
-            [
-                'de' => 'ORDER_DUMP ' . $tag,
-                'en' => 'ORDER_DUMP ' . $tag,
-                'data' => $data
-            ]
-        );
+        $this->getLogger('OrderFilters')->debug('ORDER_DUMP ' . $tag . ' ' . json_encode($data));
     }
 
     private function dumpOrderRelations(array $rels, int $max): array
