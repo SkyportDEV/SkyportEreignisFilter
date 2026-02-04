@@ -87,22 +87,25 @@ class OrderFilters
         return $value === null ? $default : $value;
     }
 
-    private function parseIds(string $csv): array
+    private function parseIds(string $input): array
     {
+        // Zeilenumbrüche vereinheitlichen → Komma
+        $input = str_replace(["\r\n", "\r", "\n"], ",", $input);
+    
         $out = [];
-
-        foreach (explode(',', $csv) as $part) {
+    
+        foreach (explode(",", $input) as $part) {
             $part = trim($part);
             if ($part === '') {
                 continue;
             }
-
+    
             $id = (int)$part;
             if ($id > 0) {
                 $out[] = $id;
             }
         }
-
+    
         return array_values(array_unique($out));
     }
 
