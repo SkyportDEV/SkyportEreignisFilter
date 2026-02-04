@@ -6,6 +6,8 @@ use Plenty\Modules\EventProcedures\Events\EventProceduresTriggered;
 use Plenty\Plugin\ConfigRepository;
 use Plenty\Plugin\Log\Loggable;
 
+private const LOG_PREFIX = 'SkyportAuftragsFilter::log.';
+
 class OrderFilters
 {
     use Loggable;
@@ -237,9 +239,9 @@ class OrderFilters
         if (!$debugEnabled) {
             return;
         }
-
+    
         $this->getLogger('OrderFilters')->debug(
-            'SkyportAuftragsFilter::log.' . $code,
+            self::LOG_PREFIX . $code,
             $context
         );
     }
