@@ -32,6 +32,11 @@ class OrderFilters
             return false;
         }
 
+        // "Ping" zum Beweis, dass der Filter läuft (nur bei Debug aktiv)
+        $this->debug('ping', [
+            'slot' => $slot
+        ]);
+
         // Nur dumpen, wenn Debug aktiv ist
         $this->dumpOrder($order, 'before_check_slot_' . $slot);
 
@@ -48,7 +53,10 @@ class OrderFilters
 
         $ids = $this->parseIds($idsInput);
         if (count($ids) === 0) {
-            $this->debug('Slot ' . $slot . $this->hint($hint) . ' keine IDs konfiguriert -> false');
+            $this->debug('noIds', [
+                'slot' => $slot,
+                'hint' => $this->hint($hint)
+            ]);
             return false;
         }
 
@@ -61,27 +69,36 @@ class OrderFilters
         } elseif ($type === 'shippingAddress') {
             $value = $this->extractAddressIdByTypeId($order, 2);
         } else {
-            $this->debug('Slot ' . $slot . $this->hint($hint) . ' unbekannter Typ: ' . $type . ' -> false');
+            $this->debug('unknownType', [
+                'slot' => $slot,
+                'hint' => $this->hint($hint),
+                'type' => $type
+            ]);
             return false;
         }
 
         if ($value <= 0) {
-            $this->debug('Slot ' . $slot . $this->hint($hint) . ' kein Wert ermittelbar (type=' . $type . ') -> false');
+            $this->debug('noValue', [
+                'slot' => $slot,
+                'hint' => $this->hint($hint),
+                'type' => $type
+            ]);
             return false;
         }
 
         $inList = in_array($value, $ids, true);
         $result = ($mode === 'deny') ? !$inList : $inList;
 
-        $this->debug(
-            'Slot ' . $slot .
-            $this->hint($hint) .
-            ' type=' . $type .
-            ' value=' . $value .
-            ' mode=' . $mode .
-            ' inList=' . ($inList ? '1' : '0') .
-            ' => ' . ($result ? 'true' : 'false')
-        );
+        $this->debug('decision', [
+            'slot' => $slot,
+            'hint' => $this->hint($hint),
+            'type' => $type,
+            'value' => (string)$value,
+            'mode' => $mode,
+            'inList' => $inList ? '1' : '0',
+            'result' => $result ? 'true' : 'false',
+            'ids' => implode(',', $ids)
+        ]);
 
         return $result;
     }
@@ -156,10 +173,6 @@ class OrderFilters
     /**
      * Billing/Shipping AddressId
      * typeId: 1=billing, 2=shipping
-     *
-     * Wir prüfen mehrere mögliche Strukturen:
-     * - $order->addressRelations (Relationen)
-     * - $order->addresses (Liste)
      */
     private function extractAddressIdByTypeId($order, int $typeId): int
     {
@@ -214,19 +227,25 @@ class OrderFilters
         return $hint !== '' ? ' (' . $hint . ')' : '';
     }
 
-    private function debug(string $message): void
+    /**
+     * Debug-Logger: nutzt Log-Codes + Context
+     * WICHTIG: requires resources/lang/*/log.properties entries for each code
+     */
+    private function debug(string $code, array $context = []): void
     {
         $debugEnabled = ((int)$this->getConfig('debug', 0) === 1);
         if (!$debugEnabled) {
             return;
         }
-    
-        $this->getLogger('OrderFilters')->debug($message);
+
+        $this->getLogger('OrderFilters')->debug(
+            'SkyportAuftragsFilter::log.' . $code,
+            $context
+        );
     }
 
     /**
-     * Plenty-sicherer Order-Dump (ohne verbotene Funktionen)
-     * Loggt gezielt die relevanten Felder + kurze Previews.
+     * Order-Dump als Log-Code
      */
     private function dumpOrder($order, string $tag): void
     {
@@ -234,7 +253,7 @@ class OrderFilters
         if (!$debugEnabled) {
             return;
         }
-    
+
         $data = [
             'tag' => $tag,
             'id' => isset($order->id) ? (int)$order->id : 0,
@@ -246,20 +265,23 @@ class OrderFilters
             'has_addresses' => (isset($order->addresses) && is_array($order->addresses)) ? 1 : 0,
             'has_orderRelations' => (isset($order->orderRelations) && is_array($order->orderRelations)) ? 1 : 0
         ];
-    
+
         if (isset($order->addressRelations) && is_array($order->addressRelations)) {
             $data['addressRelations_preview'] = $this->dumpAddressRelations($order->addressRelations, 20);
         }
-    
+
         if (isset($order->addresses) && is_array($order->addresses)) {
             $data['addresses_preview'] = $this->dumpAddresses($order->addresses, 20);
         }
-    
+
         if (isset($order->orderRelations) && is_array($order->orderRelations)) {
             $data['orderRelations_preview'] = $this->dumpOrderRelations($order->orderRelations, 20);
         }
-    
-        $this->getLogger('OrderFilters')->debug('ORDER_DUMP ' . $tag . ' ' . json_encode($data));
+
+        $this->debug('orderDump', [
+            'tag' => $tag,
+            'data' => json_encode($data)
+        ]);
     }
 
     private function dumpOrderRelations(array $rels, int $max): array
