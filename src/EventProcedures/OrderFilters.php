@@ -220,8 +220,14 @@ class OrderFilters
         if (!$debugEnabled) {
             return;
         }
-
-        $this->getLogger('Skyport::AuftragsFilter')->info($message);
+    
+        $this->getLogger('OrderFilters_debug')->report(
+            'SkyportAuftragsFilter::debug',
+            [
+                'de' => $message,
+                'en' => $message
+            ]
+        );
     }
 
     /**
@@ -234,7 +240,7 @@ class OrderFilters
         if (!$debugEnabled) {
             return;
         }
-
+    
         $data = [
             'tag' => $tag,
             'id' => isset($order->id) ? (int)$order->id : 0,
@@ -246,20 +252,27 @@ class OrderFilters
             'has_addresses' => (isset($order->addresses) && is_array($order->addresses)) ? 1 : 0,
             'has_orderRelations' => (isset($order->orderRelations) && is_array($order->orderRelations)) ? 1 : 0
         ];
-
+    
         if (isset($order->addressRelations) && is_array($order->addressRelations)) {
             $data['addressRelations_preview'] = $this->dumpAddressRelations($order->addressRelations, 20);
         }
-
+    
         if (isset($order->addresses) && is_array($order->addresses)) {
             $data['addresses_preview'] = $this->dumpAddresses($order->addresses, 20);
         }
-
+    
         if (isset($order->orderRelations) && is_array($order->orderRelations)) {
             $data['orderRelations_preview'] = $this->dumpOrderRelations($order->orderRelations, 20);
         }
-
-        $this->getLogger('Skyport::AuftragsFilter')->info('ORDER_DUMP', $data);
+    
+        $this->getLogger('OrderFilters_dumpOrder')->report(
+            'SkyportAuftragsFilter::orderDump',
+            [
+                'de' => 'ORDER_DUMP ' . $tag,
+                'en' => 'ORDER_DUMP ' . $tag,
+                'data' => $data
+            ]
+        );
     }
 
     private function dumpOrderRelations(array $rels, int $max): array
