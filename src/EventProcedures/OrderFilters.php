@@ -178,6 +178,30 @@ class OrderFilters
      */
     private function extractAddressIdByTypeId($order, int $typeId): int
     {
+        // 1 = billing, 2 = shipping (delivery)
+        if ($typeId === 1) {
+            if (isset($order->billingAddress) && is_object($order->billingAddress)) {
+                if (isset($order->billingAddress->id)) {
+                    $id = (int)$order->billingAddress->id;
+                    if ($id > 0) {
+                        return $id;
+                    }
+                }
+            }
+        } elseif ($typeId === 2) {
+            // plentymarkets uses "deliveryAddress" (shipping)
+            if (isset($order->deliveryAddress) && is_object($order->deliveryAddress)) {
+                if (isset($order->deliveryAddress->id)) {
+                    $id = (int)$order->deliveryAddress->id;
+                    if ($id > 0) {
+                        return $id;
+                    }
+                }
+            }
+        }
+    
+        // Fallbacks (falls im Event-Kontext nicht hydriert)
+        // addressRelations
         if (isset($order->addressRelations) && is_array($order->addressRelations)) {
             foreach ($order->addressRelations as $rel) {
                 if (isset($rel->typeId) && (int)$rel->typeId === $typeId) {
@@ -190,37 +214,38 @@ class OrderFilters
                 }
             }
         }
-
+    
+        // addresses list
         if (isset($order->addresses) && is_array($order->addresses)) {
             foreach ($order->addresses as $addr) {
                 $t = 0;
-
+    
                 if (isset($addr->typeId)) {
                     $t = (int)$addr->typeId;
                 } elseif (isset($addr->addressTypeId)) {
                     $t = (int)$addr->addressTypeId;
                 }
-
+    
                 if ($t !== $typeId) {
                     continue;
                 }
-
-                if (isset($addr->addressId)) {
-                    $aid = (int)$addr->addressId;
-                    if ($aid > 0) {
-                        return $aid;
-                    }
-                }
-
+    
                 if (isset($addr->id)) {
                     $aid = (int)$addr->id;
                     if ($aid > 0) {
                         return $aid;
                     }
                 }
+    
+                if (isset($addr->addressId)) {
+                    $aid = (int)$addr->addressId;
+                    if ($aid > 0) {
+                        return $aid;
+                    }
+                }
             }
         }
-
+    
         return 0;
     }
 
