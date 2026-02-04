@@ -231,7 +231,7 @@ class OrderFilters
 
     /**
      * Debug-Logger: nutzt Log-Codes + Context
-     * WICHTIG: requires resources/lang/*/log.properties entries for each code
+     * WICHTIG: requires resources/lang/<lang>/log.properties entries for each code
      */
     private function debug(string $code, array $context = []): void
     {
