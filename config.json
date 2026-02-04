@@ -50,8 +50,8 @@
     {
         "tab": "Filter 1",
         "key": "filter1_ids",
-        "label": "IDs",
-        "type": "text",
+        "label": "IDs (eine pro Zeile ODER Komma-getrennt)",
+        "type": "textarea",
         "default": ""
     },
     {
@@ -101,8 +101,8 @@
     {
         "tab": "Filter 2",
         "key": "filter2_ids",
-        "label": "IDs",
-        "type": "text",
+        "label": "IDs (eine pro Zeile ODER Komma-getrennt)",
+        "type": "textarea",
         "default": ""
     },
     {
@@ -152,8 +152,8 @@
     {
         "tab": "Filter 3",
         "key": "filter3_ids",
-        "label": "IDs",
-        "type": "text",
+        "label": "IDs (eine pro Zeile ODER Komma-getrennt)",
+        "type": "textarea",
         "default": ""
     },
     {
@@ -203,8 +203,8 @@
     {
         "tab": "Filter 4",
         "key": "filter4_ids",
-        "label": "IDs",
-        "type": "text",
+        "label": "IDs (eine pro Zeile ODER Komma-getrennt)",
+        "type": "textarea",
         "default": ""
     },
     {
@@ -254,8 +254,8 @@
     {
         "tab": "Filter 5",
         "key": "filter5_ids",
-        "label": "IDs",
-        "type": "text",
+        "label": "IDs (eine pro Zeile ODER Komma-getrennt)",
+        "type": "textarea",
         "default": ""
     },
     {
@@ -305,8 +305,8 @@
     {
         "tab": "Filter 6",
         "key": "filter6_ids",
-        "label": "IDs",
-        "type": "text",
+        "label": "IDs (eine pro Zeile ODER Komma-getrennt)",
+        "type": "textarea",
         "default": ""
     },
     {
