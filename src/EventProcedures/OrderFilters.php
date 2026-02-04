@@ -1,6 +1,6 @@
 <?php
 
-namespace Skyport\AuftragsFilter\EventProcedures;
+namespace SkyportAuftragsFilter\EventProcedures;
 
 use Plenty\Modules\EventProcedures\Events\EventProceduresTriggered;
 use Plenty\Plugin\ConfigRepository;
@@ -27,22 +27,26 @@ class OrderFilters
     private function checkSlot(EventProceduresTriggered $event, int $slot): bool
     {
         $order = $event->getOrder();
-        $this->dumpOrder($order, 'before_hydrate');
+
         if (!$order) {
             return false;
         }
 
-        $enabled = (bool)$this->getConfig('filter' . $slot . '_enabled', false);
+        // Nur dumpen, wenn Debug aktiv ist
+        $this->dumpOrder($order, 'before_check_slot_' . $slot);
+
+        // Dropdown liefert "0"/"1" als String -> immer int casten!
+        $enabled = ((int)$this->getConfig('filter' . $slot . '_enabled', 0) === 1);
         if (!$enabled) {
             return false;
         }
 
         $type = (string)$this->getConfig('filter' . $slot . '_type', 'contact');
         $mode = (string)$this->getConfig('filter' . $slot . '_mode', 'allow');
-        $idsCsv = (string)$this->getConfig('filter' . $slot . '_ids', '');
+        $idsInput = (string)$this->getConfig('filter' . $slot . '_ids', '');
         $hint = (string)$this->getConfig('filter' . $slot . '_hint', '');
 
-        $ids = $this->parseIds($idsCsv);
+        $ids = $this->parseIds($idsInput);
         if (count($ids) === 0) {
             $this->debug('Slot ' . $slot . $this->hint($hint) . ' keine IDs konfiguriert -> false');
             return false;
@@ -88,107 +92,120 @@ class OrderFilters
         return $value === null ? $default : $value;
     }
 
+    /**
+     * IDs: erlaubt Komma UND Zeilenumbrüche (auch gemischt)
+     */
     private function parseIds(string $input): array
     {
-        // Zeilenumbrüche vereinheitlichen → Komma
         $input = str_replace(["\r\n", "\r", "\n"], ",", $input);
-    
+
         $out = [];
-    
+
         foreach (explode(",", $input) as $part) {
             $part = trim($part);
             if ($part === '') {
                 continue;
             }
-    
+
             $id = (int)$part;
             if ($id > 0) {
                 $out[] = $id;
             }
         }
-    
+
         return array_values(array_unique($out));
     }
 
     /**
-     * ContactId aus OrderRelations (receiver contact)
+     * Receiver-ContactId
+     * Best Case: $order->contactReceiverId (stabil)
      */
     private function extractReceiverContactId($order): int
     {
-        // 1) Best case (Order-Model Feld): receiver contact id
         if (isset($order->contactReceiverId)) {
             $cid = (int)$order->contactReceiverId;
             if ($cid > 0) {
                 return $cid;
             }
         }
-    
-        // 2) Fallback (manche Kontexte): contactId
+
+        // Fallback (manche Kontexte)
         if (isset($order->contactId)) {
             $cid = (int)$order->contactId;
             if ($cid > 0) {
                 return $cid;
             }
         }
-    
-        // 3) Letzter Fallback: orderRelations (falls vorhanden)
-        if (!isset($order->orderRelations) || !is_array($order->orderRelations)) {
-            return 0;
-        }
-    
-        foreach ($order->orderRelations as $relation) {
-            if (
-                isset($relation->referenceType, $relation->relation, $relation->referenceId)
-                && (string)$relation->referenceType === 'contact'
-                && (string)$relation->relation === 'receiver'
-            ) {
-                return (int)$relation->referenceId;
+
+        // Optionaler Fallback: orderRelations (nur wenn vorhanden)
+        if (isset($order->orderRelations) && is_array($order->orderRelations)) {
+            foreach ($order->orderRelations as $relation) {
+                if (
+                    isset($relation->referenceType, $relation->relation, $relation->referenceId)
+                    && (string)$relation->referenceType === 'contact'
+                    && (string)$relation->relation === 'receiver'
+                ) {
+                    return (int)$relation->referenceId;
+                }
             }
         }
-    
+
         return 0;
     }
 
     /**
-     * AddressId aus addressRelations (typeId: 1=billing, 2=shipping)
+     * Billing/Shipping AddressId
+     * typeId: 1=billing, 2=shipping
+     *
+     * Wir prüfen mehrere mögliche Strukturen:
+     * - $order->addressRelations (Relationen)
+     * - $order->addresses (Liste)
      */
-    private function extractAddressIdByType($order, int $typeId): int
+    private function extractAddressIdByTypeId($order, int $typeId): int
     {
-        // Einige Systeme liefern addressRelations, andere addresses
-        $list = null;
-    
         if (isset($order->addressRelations) && is_array($order->addressRelations)) {
-            $list = $order->addressRelations;
-        } elseif (isset($order->addresses) && is_array($order->addresses)) {
-            $list = $order->addresses;
-        }
-    
-        if (!is_array($list)) {
-            return 0;
-        }
-    
-        foreach ($list as $row) {
-            // Varianten: typeId / addressTypeId / orderAddressTypeId
-            $t = 0;
-            if (isset($row->typeId)) {
-                $t = (int)$row->typeId;
-            } elseif (isset($row->addressTypeId)) {
-                $t = (int)$row->addressTypeId;
-            }
-    
-            if ($t !== $typeId) {
-                continue;
-            }
-    
-            // Varianten: addressId / id
-            if (isset($row->addressId)) {
-                return (int)$row->addressId;
-            }
-            if (isset($row->id)) {
-                return (int)$row->id;
+            foreach ($order->addressRelations as $rel) {
+                if (isset($rel->typeId) && (int)$rel->typeId === $typeId) {
+                    if (isset($rel->addressId)) {
+                        $aid = (int)$rel->addressId;
+                        if ($aid > 0) {
+                            return $aid;
+                        }
+                    }
+                }
             }
         }
-    
+
+        if (isset($order->addresses) && is_array($order->addresses)) {
+            foreach ($order->addresses as $addr) {
+                $t = 0;
+
+                if (isset($addr->typeId)) {
+                    $t = (int)$addr->typeId;
+                } elseif (isset($addr->addressTypeId)) {
+                    $t = (int)$addr->addressTypeId;
+                }
+
+                if ($t !== $typeId) {
+                    continue;
+                }
+
+                if (isset($addr->addressId)) {
+                    $aid = (int)$addr->addressId;
+                    if ($aid > 0) {
+                        return $aid;
+                    }
+                }
+
+                if (isset($addr->id)) {
+                    $aid = (int)$addr->id;
+                    if ($aid > 0) {
+                        return $aid;
+                    }
+                }
+            }
+        }
+
         return 0;
     }
 
@@ -199,7 +216,7 @@ class OrderFilters
 
     private function debug(string $message): void
     {
-        $debugEnabled = (bool)$this->getConfig('debug', false);
+        $debugEnabled = ((int)$this->getConfig('debug', 0) === 1);
         if (!$debugEnabled) {
             return;
         }
@@ -207,83 +224,107 @@ class OrderFilters
         $this->getLogger('Skyport::AuftragsFilter')->info($message);
     }
 
+    /**
+     * Plenty-sicherer Order-Dump (ohne verbotene Funktionen)
+     * Loggt gezielt die relevanten Felder + kurze Previews.
+     */
     private function dumpOrder($order, string $tag): void
     {
-        if (((int)$this->getConfig('debug', 0) !== 1)) {
+        $debugEnabled = ((int)$this->getConfig('debug', 0) === 1);
+        if (!$debugEnabled) {
             return;
         }
-    
-        $data = $this->toArraySafe($order, 4, 25);
-    
-        // Damit du es im Log wiederfindest:
-        $this->getLogger('Skyport::AuftragsFilter')->info('ORDER_DUMP ' . $tag, $data);
+
+        $data = [
+            'tag' => $tag,
+            'id' => isset($order->id) ? (int)$order->id : 0,
+            'orderId' => isset($order->orderId) ? (int)$order->orderId : 0,
+            'statusId' => isset($order->statusId) ? (string)$order->statusId : '',
+            'contactReceiverId' => isset($order->contactReceiverId) ? (int)$order->contactReceiverId : 0,
+            'contactId' => isset($order->contactId) ? (int)$order->contactId : 0,
+            'has_addressRelations' => (isset($order->addressRelations) && is_array($order->addressRelations)) ? 1 : 0,
+            'has_addresses' => (isset($order->addresses) && is_array($order->addresses)) ? 1 : 0,
+            'has_orderRelations' => (isset($order->orderRelations) && is_array($order->orderRelations)) ? 1 : 0
+        ];
+
+        if (isset($order->addressRelations) && is_array($order->addressRelations)) {
+            $data['addressRelations_preview'] = $this->dumpAddressRelations($order->addressRelations, 20);
+        }
+
+        if (isset($order->addresses) && is_array($order->addresses)) {
+            $data['addresses_preview'] = $this->dumpAddresses($order->addresses, 20);
+        }
+
+        if (isset($order->orderRelations) && is_array($order->orderRelations)) {
+            $data['orderRelations_preview'] = $this->dumpOrderRelations($order->orderRelations, 20);
+        }
+
+        $this->getLogger('Skyport::AuftragsFilter')->info('ORDER_DUMP', $data);
     }
-    
-    /**
-     * Wandelt Objekt/Array rekursiv in Arrays um.
-     * - maxDepth: wie tief rekursiv geloggt wird
-     * - maxItems: wie viele Elemente pro Array/Objekt geloggt werden
-     */
-    private function toArraySafe($value, int $maxDepth = 3, int $maxItems = 30)
+
+    private function dumpOrderRelations(array $rels, int $max): array
     {
-        if ($maxDepth <= 0) {
-            return '[maxDepth]';
-        }
-    
-        if (is_null($value) || is_scalar($value)) {
-            return $value;
-        }
-    
-        // Arrays
-        if (is_array($value)) {
-            $out = [];
-            $i = 0;
-            foreach ($value as $k => $v) {
-                $out[(string)$k] = $this->toArraySafe($v, $maxDepth - 1, $maxItems);
-                $i++;
-                if ($i >= $maxItems) {
-                    $out['...'] = '[maxItems reached]';
-                    break;
-                }
-            }
-            return $out;
-        }
-    
-        // Traversable (falls plentymarkets collections liefert)
-        if ($value instanceof \Traversable) {
-            $out = [];
-            $i = 0;
-            foreach ($value as $k => $v) {
-                $out[(string)$k] = $this->toArraySafe($v, $maxDepth - 1, $maxItems);
-                $i++;
-                if ($i >= $maxItems) {
-                    $out['...'] = '[maxItems reached]';
-                    break;
-                }
-            }
-            return $out;
-        }
-    
-        // Objekte: nur public properties
-        if (is_object($value)) {
-            $vars = get_object_vars($value);
-            $out = [
-                '__class' => get_class($value)
+        $out = [];
+        $i = 0;
+
+        foreach ($rels as $rel) {
+            $out[] = [
+                'referenceType' => isset($rel->referenceType) ? (string)$rel->referenceType : '',
+                'relation' => isset($rel->relation) ? (string)$rel->relation : '',
+                'referenceId' => isset($rel->referenceId) ? (int)$rel->referenceId : 0
             ];
-    
-            $i = 0;
-            foreach ($vars as $k => $v) {
-                $out[$k] = $this->toArraySafe($v, $maxDepth - 1, $maxItems);
-                $i++;
-                if ($i >= $maxItems) {
-                    $out['...'] = '[maxItems reached]';
-                    break;
-                }
+
+            $i++;
+            if ($i >= $max) {
+                $out[] = ['...' => 'max reached'];
+                break;
             }
-    
-            return $out;
         }
-    
-        return '[unsupported type]';
+
+        return $out;
+    }
+
+    private function dumpAddressRelations(array $rels, int $max): array
+    {
+        $out = [];
+        $i = 0;
+
+        foreach ($rels as $rel) {
+            $out[] = [
+                'typeId' => isset($rel->typeId) ? (int)$rel->typeId : 0,
+                'addressId' => isset($rel->addressId) ? (int)$rel->addressId : 0
+            ];
+
+            $i++;
+            if ($i >= $max) {
+                $out[] = ['...' => 'max reached'];
+                break;
+            }
+        }
+
+        return $out;
+    }
+
+    private function dumpAddresses(array $addresses, int $max): array
+    {
+        $out = [];
+        $i = 0;
+
+        foreach ($addresses as $a) {
+            $out[] = [
+                'id' => isset($a->id) ? (int)$a->id : 0,
+                'typeId' => isset($a->typeId) ? (int)$a->typeId : 0,
+                'addressTypeId' => isset($a->addressTypeId) ? (int)$a->addressTypeId : 0,
+                'addressId' => isset($a->addressId) ? (int)$a->addressId : 0
+            ];
+
+            $i++;
+            if ($i >= $max) {
+                $out[] = ['...' => 'max reached'];
+                break;
+            }
+        }
+
+        return $out;
     }
 }
