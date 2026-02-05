@@ -6,6 +6,8 @@ use Plenty\Plugin\ServiceProvider;
 use Plenty\Modules\EventProcedures\Services\EventProceduresService;
 use Plenty\Modules\EventProcedures\Services\Entries\ProcedureEntry;
 use SkyportEreignisFilter\EventProcedures\OrderFilters;
+use SkyportEreignisFilter\Providers\RouteServiceProvider;
+use SkyportEreignisFilter\Providers\BackendServiceProvider;
 
 class SkyportEreignisFilterServiceProvider extends ServiceProvider
 {
@@ -22,5 +24,11 @@ class SkyportEreignisFilterServiceProvider extends ServiceProvider
                 OrderFilters::class . '@filter' . $i
             );
         }
+    }
+
+    public function register()
+    {
+        $this->getApplication()->register(RouteServiceProvider::class);
+        $this->getApplication()->register(BackendServiceProvider::class);
     }
 }
