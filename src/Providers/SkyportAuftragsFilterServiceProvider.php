@@ -1,13 +1,13 @@
 <?php
 
-namespace SkyportAuftragsFilter\Providers;
+namespace SkyportEreignisFilter\Providers;
 
 use Plenty\Plugin\ServiceProvider;
 use Plenty\Modules\EventProcedures\Services\EventProceduresService;
 use Plenty\Modules\EventProcedures\Services\Entries\ProcedureEntry;
-use SkyportAuftragsFilter\EventProcedures\OrderFilters;
+use SkyportEreignisFilter\EventProcedures\OrderFilters;
 
-class SkyportAuftragsFilterServiceProvider extends ServiceProvider
+class SkyportEreignisFilterServiceProvider extends ServiceProvider
 {
     public function boot(EventProceduresService $eventProceduresService): void
     {
