@@ -5,7 +5,7 @@ namespace SkyportEreignisFilter\Providers;
 use Plenty\Plugin\RouteServiceProvider;
 use Plenty\Plugin\Routing\Router;
 
-class RouteServiceProvider extends RouteServiceProvider
+class SkyportEreignisFilterRouteServiceProvider extends RouteServiceProvider
 {
     public function map(Router $router)
     {
