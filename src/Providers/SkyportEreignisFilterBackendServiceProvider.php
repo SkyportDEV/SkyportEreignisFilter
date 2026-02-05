@@ -5,7 +5,7 @@ namespace SkyportEreignisFilter\Providers;
 use Plenty\Plugin\ServiceProvider;
 use Plenty\Plugin\Events\BackendMenuEvent;
 
-class BackendServiceProvider extends ServiceProvider
+class SkyportEreignisFilterBackendServiceProvider extends ServiceProvider
 {
     public function boot()
     {
