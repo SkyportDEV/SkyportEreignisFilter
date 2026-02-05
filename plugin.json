@@ -1,9 +1,9 @@
 {
-    "name": "SkyportAuftragsFilter",
-    "namespace": "SkyportAuftragsFilter",
+    "name": "Skyport Ereignis-Filter",
+    "namespace": "SkyportEreignisFilter",
     "type": "general",
-    "version": "0.0.3",
-    "description": "Ereignisaktions-Filter für Aufträge nach ContactId sowie Billing-/Shipping-AddressId.",
+    "version": "0.2.0",
+    "description": "Ereignisaktions-Filter für Plenty Events (Kontakt, Adressen etc.)",
     "author": "Skyport GmbH (Alexander Schieder)",
-    "serviceProvider": "SkyportAuftragsFilter\\Providers\\SkyportAuftragsFilterServiceProvider"
+    "serviceProvider": "SkyportEreignisFilter\\Providers\\SkyportEreignisFilterServiceProvider"
 }
