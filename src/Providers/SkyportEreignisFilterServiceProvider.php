@@ -13,11 +13,11 @@ class SkyportEreignisFilterServiceProvider extends ServiceProvider
     {
         for ($i = 1; $i <= 6; $i++) {
             $eventProceduresService->registerFilter(
-                'skyport_auftrags_filter_' . $i,
+                'skyport_ereignis_filter_' . $i,
                 ProcedureEntry::EVENT_TYPE_ORDER,
                 [
-                    'de' => 'Skyport Auftrags-Filter ' . $i,
-                    'en' => 'Skyport Order Filter ' . $i
+                    'de' => 'Skyport Ereignis-Filter ' . $i,
+                    'en' => 'Skyport Event Filter ' . $i
                 ],
                 OrderFilters::class . '@filter' . $i
             );
