@@ -1,6 +1,6 @@
 <?php
 
-namespace SkyportAuftragsFilter\EventProcedures;
+namespace SkyportEreignisFilter\EventProcedures;
 
 use Plenty\Modules\EventProcedures\Events\EventProceduresTriggered;
 use Plenty\Plugin\ConfigRepository;
@@ -10,7 +10,7 @@ class OrderFilters
 {
     use Loggable;
 
-    private const LOG_PREFIX = 'SkyportAuftragsFilter::log.';
+    private const LOG_PREFIX = 'SkyportEreignisFilter::log.';
 
     private ConfigRepository $config;
 
@@ -107,7 +107,7 @@ class OrderFilters
 
     private function getConfig(string $key, $default)
     {
-        $value = $this->config->get('SkyportAuftragsFilter.' . $key);
+        $value = $this->config->get('SkyportEreignisFilter.' . $key);
         return $value === null ? $default : $value;
     }
 
